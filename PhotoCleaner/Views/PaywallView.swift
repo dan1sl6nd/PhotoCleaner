@@ -175,13 +175,13 @@ struct PaywallView: View {
 
                         HStack(spacing: 16) {
                             Button("Terms of Use") {
-                                if let url = URL(string: "https://dan1sl6nd.github.io/PhotoCleaner/terms-of-use") {
+                                if let url = URL(string: "https://dan1sl6nd.github.io/PhotoCleaner/terms-of-use.html") {
                                     UIApplication.shared.open(url)
                                 }
                             }
                             Text("•")
                             Button("Privacy Policy") {
-                                if let url = URL(string: "https://dan1sl6nd.github.io/PhotoCleaner/privacy-policy") {
+                                if let url = URL(string: "https://dan1sl6nd.github.io/PhotoCleaner/privacy-policy.html") {
                                     UIApplication.shared.open(url)
                                 }
                             }
