@@ -86,7 +86,7 @@ These Terms shall be governed by and construed in accordance with the laws of th
 ## 11. Contact Information
 
 For questions about these Terms, please contact us at:
-[Your Contact Email]
+dan1sl6nd@gmail.com
 
 ## 12. Severability
 

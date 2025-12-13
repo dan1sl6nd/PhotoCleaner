@@ -184,7 +184,7 @@ The App may contain links to third-party websites or services. We are not respon
 
 If you have questions or concerns about this Privacy Policy or our privacy practices, please contact us at:
 
-**Email:** [Your Contact Email]
+**Email:** dan1sl6nd@gmail.com
 
 ## Consent
 

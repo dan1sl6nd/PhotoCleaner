@@ -19,7 +19,7 @@ PhotoCleaner is a privacy-focused photo organization app that helps you clean an
 
 ## Contact
 
-For questions about these legal documents, please contact us at [Your Contact Email]
+For questions about these legal documents, please contact us at dan1sl6nd@gmail.com
 
 ---
 
