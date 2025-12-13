@@ -1,0 +1,11 @@
+title: PhotoCleaner Legal
+description: Terms of Use and Privacy Policy for PhotoCleaner
+theme: jekyll-theme-cayman
+markdown: kramdown
+
+# GitHub Pages configuration
+baseurl: ""
+url: ""
+
+# Navigation
+show_downloads: false
