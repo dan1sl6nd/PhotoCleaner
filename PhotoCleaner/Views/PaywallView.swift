@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import StoreKit
 
 struct PaywallView: View {
     @Environment(SubscriptionManager.self) private var subscriptionManager
@@ -95,7 +96,8 @@ struct PaywallView: View {
                         ForEach(SubscriptionPlan.allCases, id: \.self) { plan in
                             SubscriptionPlanCard(
                                 plan: plan,
-                                isSelected: selectedPlan == plan
+                                isSelected: selectedPlan == plan,
+                                subscriptionManager: subscriptionManager
                             ) {
                                 selectPlan(plan)
                             }
@@ -120,8 +122,9 @@ struct PaywallView: View {
                                 }
                             }
 
-                            if selectedPlan.hasTrial {
-                                Text("Then \(selectedPlan.price)/\(selectedPlan.period)")
+                            if selectedPlan.hasTrialOffer(from: subscriptionManager.product(for: selectedPlan)) {
+                                let product = subscriptionManager.product(for: selectedPlan)
+                                Text("Then \(selectedPlan.formattedPrice(from: product))/\(selectedPlan.subscriptionPeriod(from: product))")
                                     .font(.system(size: 13, weight: .medium))
                                     .foregroundColor(.white.opacity(0.8))
                             }
@@ -157,13 +160,16 @@ struct PaywallView: View {
 
                     // Legal text
                     VStack(spacing: 8) {
-                        if selectedPlan.hasTrial {
-                            Text("Free for \(selectedPlan.trialDuration), then \(selectedPlan.price)/\(selectedPlan.period)")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.white.opacity(0.6))
-                                .lineLimit(nil)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .multilineTextAlignment(.center)
+                        if selectedPlan.hasTrialOffer(from: subscriptionManager.product(for: selectedPlan)) {
+                            let product = subscriptionManager.product(for: selectedPlan)
+                            if let trial = selectedPlan.trialPeriod(from: product) {
+                                Text("Free for \(trial), then \(selectedPlan.formattedPrice(from: product))/\(selectedPlan.subscriptionPeriod(from: product))")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.6))
+                                    .lineLimit(nil)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .multilineTextAlignment(.center)
+                            }
                         }
 
                         Text("Auto-renewable. Cancel anytime in Settings.")
@@ -227,10 +233,16 @@ struct PaywallView: View {
     }
 
     private func getSubscribeButtonText() -> String {
-        if selectedPlan.hasTrial {
-            return "Start \(selectedPlan.trialDuration) Free Trial"
+        let product = subscriptionManager.product(for: selectedPlan)
+
+        if selectedPlan.hasTrialOffer(from: product) {
+            if let trial = selectedPlan.trialPeriod(from: product) {
+                return "Start \(trial) Free Trial"
+            } else {
+                return "Start Free Trial"
+            }
         } else {
-            return "Subscribe for \(selectedPlan.price)/\(selectedPlan.period)"
+            return "Subscribe for \(selectedPlan.formattedPrice(from: product))/\(selectedPlan.subscriptionPeriod(from: product))"
         }
     }
 
@@ -310,7 +322,20 @@ struct BenefitRow: View {
 struct SubscriptionPlanCard: View {
     let plan: SubscriptionPlan
     let isSelected: Bool
+    let subscriptionManager: SubscriptionManager
     let action: () -> Void
+
+    private var product: Product? {
+        subscriptionManager.product(for: plan)
+    }
+
+    private var weeklyProduct: Product? {
+        subscriptionManager.product(for: .weekly)
+    }
+
+    private var yearlyProduct: Product? {
+        subscriptionManager.product(for: .yearly)
+    }
 
     var body: some View {
         Button(action: action) {
@@ -356,7 +381,7 @@ struct SubscriptionPlanCard: View {
                                 .font(.system(size: 22, weight: .bold))
                                 .foregroundColor(.white)
 
-                            if let savings = plan.savings {
+                            if let savings = plan.calculateSavings(weeklyProduct: weeklyProduct, yearlyProduct: yearlyProduct) {
                                 Text(savings)
                                     .font(.system(size: 13, weight: .bold))
                                     .foregroundColor(.green)
@@ -369,14 +394,22 @@ struct SubscriptionPlanCard: View {
                             }
                         }
 
-                        if plan.hasTrial {
-                            Text("\(plan.trialDuration) free, then \(plan.price)/\(plan.period)")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(.white.opacity(0.7))
-                                .lineLimit(nil)
-                                .fixedSize(horizontal: false, vertical: true)
+                        if plan.hasTrialOffer(from: product) {
+                            if let trial = plan.trialPeriod(from: product) {
+                                Text("\(trial) free, then \(plan.formattedPrice(from: product))/\(plan.subscriptionPeriod(from: product))")
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.7))
+                                    .lineLimit(nil)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            } else {
+                                Text("\(plan.formattedPrice(from: product))/\(plan.subscriptionPeriod(from: product))")
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.7))
+                                    .lineLimit(nil)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                         } else {
-                            Text("\(plan.price)/\(plan.period)")
+                            Text("\(plan.formattedPrice(from: product))/\(plan.subscriptionPeriod(from: product))")
                                 .font(.system(size: 15, weight: .medium))
                                 .foregroundColor(.white.opacity(0.7))
                                 .lineLimit(nil)
