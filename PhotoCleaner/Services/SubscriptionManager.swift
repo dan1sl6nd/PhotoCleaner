@@ -45,7 +45,8 @@ class SubscriptionManager {
     // MARK: - Transaction Listener
 
     private func listenForTransactions() -> Task<Void, Error> {
-        return Task.detached { @MainActor in
+        return Task { @MainActor [weak self] in
+            guard let self = self else { return }
             for await result in Transaction.updates {
                 if case .verified(let transaction) = result {
                     // Handle the transaction update
