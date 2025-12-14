@@ -29,14 +29,13 @@ class SubscriptionManager {
     // MARK: - Initialization
 
     init() {
-        // Initialize transaction listener
-        transactionListener = Task { @MainActor in
+        // Initialize transaction listener with detached task
+        transactionListener = Task.detached {
             for await result in Transaction.updates {
                 if case .verified(let transaction) = result {
                     // Update subscription status based on transaction
                     if transaction.revocationDate == nil {
                         await MainActor.run {
-                            self.hasActiveSubscription = true
                             UserDefaults.standard.set(true, forKey: "hasActiveSubscription")
                         }
                     }
