@@ -36,19 +36,39 @@ struct MainCoordinatorView: View {
             } else if cleanerVM.isLoading {
                 // Loading photos
                 LoadingView()
-            } else if cleanerVM.isSessionComplete {
-                // Session complete - show summary
-                SummaryView()
             } else if cleanerVM.photos.isEmpty {
-                // No photos in selected album
+                // No photos in selected album - check before isSessionComplete
                 ZStack {
                     DynamicBackgroundView(colorScheme: .darkEnhanced)
-                    ContentUnavailableView(
-                        "No Photos",
-                        systemImage: "photo.on.rectangle.angled",
-                        description: Text("This album doesn't contain any photos to review")
-                    )
+
+                    VStack(spacing: 24) {
+                        ContentUnavailableView(
+                            "No Photos",
+                            systemImage: "photo.on.rectangle.angled",
+                            description: Text("This album doesn't contain any photos to review")
+                        )
+
+                        Button(action: {
+                            cleanerVM.resetSession()
+                        }) {
+                            Text("Go Back")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(width: 200, height: 50)
+                                .background(
+                                    LinearGradient(
+                                        colors: [Color.purple, Color.blue],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .cornerRadius(25)
+                        }
+                    }
                 }
+            } else if cleanerVM.isSessionComplete {
+                // Session complete - show summary (only when there were photos)
+                SummaryView()
             } else {
                 // Show photo swipe interface
                 PhotoSwipeView()
