@@ -56,7 +56,7 @@ struct MainCoordinatorView: View {
         }
         .task {
             permissionVM.checkPermissionStatus()
-            subscriptionManager.checkSubscriptionStatus()
+            await subscriptionManager.checkSubscriptionStatus()
         }
     }
 }
