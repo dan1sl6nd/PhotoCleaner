@@ -26,7 +26,7 @@ class SubscriptionManager {
     // MARK: - Initialization
 
     init() {
-        Task {
+        Task { @MainActor in
             await loadProducts()
             await checkSubscriptionStatus()
         }
