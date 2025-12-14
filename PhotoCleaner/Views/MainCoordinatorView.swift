@@ -41,29 +41,97 @@ struct MainCoordinatorView: View {
                 ZStack {
                     DynamicBackgroundView(colorScheme: .darkEnhanced)
 
-                    VStack(spacing: 24) {
-                        ContentUnavailableView(
-                            "No Photos",
-                            systemImage: "photo.on.rectangle.angled",
-                            description: Text("This album doesn't contain any photos to review")
-                        )
+                    VStack(spacing: 0) {
+                        Spacer()
 
+                        // Animated icon
+                        ZStack {
+                            // Glow effect
+                            Circle()
+                                .fill(
+                                    RadialGradient(
+                                        colors: [
+                                            Color.purple.opacity(0.3),
+                                            Color.clear
+                                        ],
+                                        center: .center,
+                                        startRadius: 10,
+                                        endRadius: 100
+                                    )
+                                )
+                                .frame(width: 200, height: 200)
+                                .blur(radius: 20)
+
+                            // Icon background
+                            Circle()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [
+                                            Color.purple.opacity(0.3),
+                                            Color.blue.opacity(0.2)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 120, height: 120)
+
+                            // Icon
+                            Image(systemName: "photo.stack")
+                                .font(.system(size: 50, weight: .light))
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        colors: [Color.purple.opacity(0.6), Color.blue.opacity(0.6)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                        }
+                        .padding(.bottom, 32)
+
+                        // Title
+                        Text("No Photos Found")
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .padding(.bottom, 12)
+
+                        // Description
+                        Text("Add some photos to your library\nto start cleaning")
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundColor(.white.opacity(0.7))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                            .padding(.bottom, 48)
+
+                        // Go back button
                         Button(action: {
                             cleanerVM.resetSession()
                         }) {
-                            Text("Go Back")
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(width: 200, height: 50)
-                                .background(
-                                    LinearGradient(
-                                        colors: [Color.purple, Color.blue],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
+                            HStack(spacing: 12) {
+                                Image(systemName: "arrow.left")
+                                    .font(.system(size: 18, weight: .semibold))
+                                Text("Go Back")
+                                    .font(.system(size: 18, weight: .semibold))
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(
+                                RoundedRectangle(cornerRadius: 28)
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [Color.purple, Color.blue],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
                                     )
-                                )
-                                .cornerRadius(25)
+                                    .shadow(color: Color.purple.opacity(0.5), radius: 20, y: 10)
+                            )
                         }
+                        .padding(.horizontal, 32)
+
+                        Spacer()
+                        Spacer()
                     }
                 }
             } else if cleanerVM.isSessionComplete {
