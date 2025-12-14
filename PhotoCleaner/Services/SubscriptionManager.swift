@@ -23,13 +23,47 @@ class SubscriptionManager {
     // For development/testing - simulate subscription
     var isDevelopmentMode: Bool = false
 
+    // Transaction listener
+    private var transactionListener: Task<Void, Error>?
+
     // MARK: - Initialization
 
     init() {
+        // Start listening for transaction updates
+        transactionListener = listenForTransactions()
+
         Task { @MainActor in
             await loadProducts()
             await checkSubscriptionStatus()
         }
+    }
+
+    deinit {
+        transactionListener?.cancel()
+    }
+
+    // MARK: - Transaction Listener
+
+    private func listenForTransactions() -> Task<Void, Error> {
+        return Task.detached { @MainActor in
+            for await result in Transaction.updates {
+                if case .verified(let transaction) = result {
+                    // Handle the transaction update
+                    await self.handleTransaction(transaction)
+                }
+            }
+        }
+    }
+
+    private func handleTransaction(_ transaction: Transaction) async {
+        // Update subscription status based on transaction
+        if transaction.revocationDate == nil {
+            hasActiveSubscription = true
+            UserDefaults.standard.set(true, forKey: "hasActiveSubscription")
+        }
+
+        // Finish the transaction
+        await transaction.finish()
     }
 
     // MARK: - Product Loading
