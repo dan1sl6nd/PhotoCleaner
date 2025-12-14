@@ -24,7 +24,7 @@ class SubscriptionManager {
     var isDevelopmentMode: Bool = false
 
     // Transaction listener
-    private var transactionListener: Task<Void, Error>?
+    nonisolated(unsafe) private var transactionListener: Task<Void, Error>?
 
     // MARK: - Initialization
 
