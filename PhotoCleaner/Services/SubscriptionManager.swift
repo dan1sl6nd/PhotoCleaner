@@ -29,8 +29,22 @@ class SubscriptionManager {
     // MARK: - Initialization
 
     init() {
-        // Start listening for transaction updates
-        transactionListener = listenForTransactions()
+        // Initialize transaction listener
+        transactionListener = Task { @MainActor in
+            for await result in Transaction.updates {
+                if case .verified(let transaction) = result {
+                    // Update subscription status based on transaction
+                    if transaction.revocationDate == nil {
+                        await MainActor.run {
+                            self.hasActiveSubscription = true
+                            UserDefaults.standard.set(true, forKey: "hasActiveSubscription")
+                        }
+                    }
+                    // Finish the transaction
+                    await transaction.finish()
+                }
+            }
+        }
 
         Task { @MainActor in
             await loadProducts()
@@ -40,31 +54,6 @@ class SubscriptionManager {
 
     deinit {
         transactionListener.cancel()
-    }
-
-    // MARK: - Transaction Listener
-
-    private func listenForTransactions() -> Task<Void, Error> {
-        return Task { @MainActor [weak self] in
-            guard let self = self else { return }
-            for await result in Transaction.updates {
-                if case .verified(let transaction) = result {
-                    // Handle the transaction update
-                    await self.handleTransaction(transaction)
-                }
-            }
-        }
-    }
-
-    private func handleTransaction(_ transaction: Transaction) async {
-        // Update subscription status based on transaction
-        if transaction.revocationDate == nil {
-            hasActiveSubscription = true
-            UserDefaults.standard.set(true, forKey: "hasActiveSubscription")
-        }
-
-        // Finish the transaction
-        await transaction.finish()
     }
 
     // MARK: - Product Loading
