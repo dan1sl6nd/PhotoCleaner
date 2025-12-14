@@ -24,7 +24,7 @@ class SubscriptionManager {
     var isDevelopmentMode: Bool = false
 
     // Transaction listener
-    private nonisolated var transactionListener: Task<Void, Error>?
+    private let transactionListener: Task<Void, Error>
 
     // MARK: - Initialization
 
@@ -39,7 +39,7 @@ class SubscriptionManager {
     }
 
     deinit {
-        transactionListener?.cancel()
+        transactionListener.cancel()
     }
 
     // MARK: - Transaction Listener
