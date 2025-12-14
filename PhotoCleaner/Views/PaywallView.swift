@@ -493,4 +493,5 @@ struct SubscriptionPlanCard: View {
 
 #Preview {
     PaywallView(painPoints: [.storage, .screenshots])
+        .environment(SubscriptionManager())
 }
