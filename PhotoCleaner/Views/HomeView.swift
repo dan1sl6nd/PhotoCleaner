@@ -18,9 +18,11 @@ struct HomeView: View {
         GeometryReader { geometry in
             // Check device idiom for accurate iPad detection
             let isIPad = UIDevice.current.userInterfaceIdiom == .pad
+            // Check if iPad is in landscape mode
+            let isIPadLandscape = isIPad && geometry.size.width > geometry.size.height
 
             // Debug logging
-            let _ = print("🔍 HomeView - View: \(geometry.size), Native: \(UIScreen.main.nativeBounds.size), Scale: \(UIScreen.main.nativeScale), isIPad: \(isIPad), Idiom: \(UIDevice.current.userInterfaceIdiom)")
+            let _ = print("🔍 HomeView - View: \(geometry.size), Native: \(UIScreen.main.nativeBounds.size), Scale: \(UIScreen.main.nativeScale), isIPad: \(isIPad), isLandscape: \(isIPadLandscape), Idiom: \(UIDevice.current.userInterfaceIdiom)")
 
             // Adjust spacing based on whether resume session card is present
             let hasResumeSession = savedSession != nil
@@ -34,7 +36,61 @@ struct HomeView: View {
                 // Dynamic background
                 DynamicBackgroundView(colorScheme: .vibrantPurple)
 
-                VStack(spacing: sectionSpacing) {
+                // Conditionally wrap in ScrollView for iPad landscape
+                Group {
+                    if isIPadLandscape {
+                        ScrollView {
+                            contentView(
+                                savedSession: savedSession,
+                                isIPad: isIPad,
+                                hasResumeSession: hasResumeSession,
+                                headerTopPadding: headerTopPadding,
+                                headerBottomPadding: headerBottomPadding,
+                                cardSpacing: cardSpacing,
+                                sectionSpacing: sectionSpacing
+                            )
+                        }
+                    } else {
+                        contentView(
+                            savedSession: savedSession,
+                            isIPad: isIPad,
+                            hasResumeSession: hasResumeSession,
+                            headerTopPadding: headerTopPadding,
+                            headerBottomPadding: headerBottomPadding,
+                            cardSpacing: cardSpacing,
+                            sectionSpacing: sectionSpacing
+                        )
+                    }
+                }
+            }
+            .navigationDestination(isPresented: $showAlbumSelection) {
+                AlbumSelectionView()
+            }
+        }
+        }
+        .onAppear {
+            // Check for saved session
+            savedSession = viewModel.getSavedSession()
+
+            withAnimation(.easeOut(duration: 0.6).delay(0.2)) {
+                cardsOpacity = 1.0
+            }
+        }
+    }
+
+    // MARK: - Content View
+
+    @ViewBuilder
+    private func contentView(
+        savedSession: SessionState?,
+        isIPad: Bool,
+        hasResumeSession: Bool,
+        headerTopPadding: CGFloat,
+        headerBottomPadding: CGFloat,
+        cardSpacing: CGFloat,
+        sectionSpacing: CGFloat
+    ) -> some View {
+        VStack(spacing: sectionSpacing) {
                     // Header - Compact when session exists
                     if let session = savedSession {
                         // Compact header
@@ -60,7 +116,7 @@ struct HomeView: View {
                             }
                         } onDiscard: {
                             SessionPersistenceManager.shared.clearSession()
-                            savedSession = nil
+                            self.savedSession = nil
                         }
                         .opacity(cardsOpacity)
                         .padding(.horizontal, isIPad ? 24 : 20)
@@ -159,20 +215,6 @@ struct HomeView: View {
 
                     Spacer(minLength: 0)
                 }
-            }
-            .navigationDestination(isPresented: $showAlbumSelection) {
-                AlbumSelectionView()
-            }
-        }
-        }
-        .onAppear {
-            // Check for saved session
-            savedSession = viewModel.getSavedSession()
-
-            withAnimation(.easeOut(duration: 0.6).delay(0.2)) {
-                cardsOpacity = 1.0
-            }
-        }
     }
 
     // MARK: - Actions
